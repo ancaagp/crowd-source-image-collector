@@ -1,0 +1,55 @@
+version: '3'
+ 
+services:
+  nginx:
+    image: nginx:1.17
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
+    ports:
+      - 80:80
+    depends_on:
+      - app
+  app:
+    image: 117472117844.dkr.ecr.eu-north-1.amazonaws.com/image_collector:latest
+    ports:
+      - "8000:8000"
+    command: >
+      sh -c " python3 manage.py makemigrations main_app &&
+              python3 manage.py migrate &&
+              python3 manage.py wait_for_db &&
+              python3 manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+    volumes: 
+      - media:/image_collector/media
+  tfworker:
+    image: 117472117844.dkr.ecr.eu-north-1.amazonaws.com/tensorflow-worker:latest
+    ports:
+      - "4000:4000"
+  db:
+    image: postgres:10-alpine
+    env_file:
+      - ./.env
+    volumes: 
+      - pgdata:/var/lib/postgresql/data
+  redis:
+    image: redis:alpine
+    ulimits:
+        nofile:
+          soft: "65536"
+          hard: "65536"
+  celery:
+    restart: always
+    image: 117472117844.dkr.ecr.eu-north-1.amazonaws.com/image_collector:latest
+    command: celery -A image_collector worker -l info
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - redis
+      - app
+volumes:
+  pgdata:
+  media:

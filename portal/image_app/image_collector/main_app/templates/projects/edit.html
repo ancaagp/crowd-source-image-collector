@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h5>Edit Project</h5>
+
+<form action="{% url 'edit_project' project.id %}" method="post">
+    {% csrf_token %}
+    {{ project_form.as_p }}
+    <input type="submit" class="btn" value="Edit Project">
+</form>
+{% endblock %}

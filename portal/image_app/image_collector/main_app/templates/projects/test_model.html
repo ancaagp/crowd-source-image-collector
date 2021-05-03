@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<h5>Test model</h5>
+
+<form action="{% url 'test_model' project.id %}" enctype="multipart/form-data" method="post">
+    {% csrf_token %}
+    {{ model_history_form.as_p }}
+    <input type="submit" class="btn" value="Upload Test Image">
+</form>
+
+{% endblock %}

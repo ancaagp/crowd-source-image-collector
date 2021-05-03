@@ -1,0 +1,5 @@
+target 'CrowdSourceImageCollector' do
+platform :ios, '14.0'
+workspace './CrowdSourceImageCollector.xcodeproj/project.xcworkspace'
+pod "Alamofire"
+end

@@ -1,0 +1,49 @@
+version: '3'
+ 
+services:
+    app:
+        build:
+            context: ./
+        ports:
+            - "8000:8000"
+        volumes:
+            - ./image_collector:/image_collector
+        command: >
+            sh -c " python3 manage.py makemigrations main_app &&
+                    python3 manage.py migrate &&
+                    python3 manage.py wait_for_db &&
+                    python3 manage.py runserver 0.0.0.0:8000"
+        env_file:
+            - ./.env
+        depends_on:
+            - db
+    tfworker:
+        build:
+            context: ./tensorflow-worker/
+        volumes:
+            - ./tensorflow-worker:/py
+        ports:
+            - "4000:4000"
+    db:
+        image: postgres:10-alpine
+        env_file:
+            - ./.env
+        volumes: 
+            - pgdata:/var/lib/postgresql/data
+    redis:
+        image: redis:alpine
+    celery:
+        restart: always
+        build:
+            context: ./
+        command: celery -A image_collector worker -l info
+        volumes:
+            - ./image_collector:/image_collector
+        env_file:
+            - ./.env
+        depends_on:
+            - db
+            - redis
+            - app
+volumes:
+    pgdata:

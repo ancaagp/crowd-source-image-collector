@@ -1,0 +1,6 @@
+framework module Pods_CrowdSourceImageCollector {
+  umbrella header "Pods-CrowdSourceImageCollector-umbrella.h"
+
+  export *
+  module * { export * }
+}
